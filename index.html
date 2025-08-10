@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Growth Hero</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Sticky Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 50px;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            padding: 15px 50px;
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid rgba(78, 205, 196, 0.4);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav a:hover {
+            color: #4ecdc4;
+        }
+
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+        }
+
+        .nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero-section {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 80px;
+        }
+
+        /* Giant Central Crystal */
+        .giant-crystal {
+            position: fixed;
+            width: 300px;
+            height: 100vh;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%) scale(0.8);
+            transform-style: preserve-3d;
+            z-index: 1;
+            transition: transform 0.1s ease;
+            background: transparent;
+            border: none;
+            outline: none;
+        }
+
+        .giant-crystal::before,
+        .giant-crystal::after {
+            content: '';
+            position: absolute;
+            background: linear-gradient(135deg, 
+                rgba(255, 107, 107, 0.85) 0%, 
+                rgba(78, 205, 196, 0.85) 15%, 
+                rgba(69, 183, 209, 0.85) 30%, 
+                rgba(150, 206, 180, 0.85) 45%, 
+                rgba(255, 234, 167, 0.85) 60%,
+                rgba(255, 107, 107, 0.85) 75%,
+                rgba(78, 205, 196, 0.85) 90%,
+                rgba(69, 183, 209, 0.85) 100%);
+            background-size: 400% 400%;
+            animation: colorShift 12s ease-in-out infinite;
+            border: none;
+            outline: none;
+        }
+
+        /* Front face - Pure crystal geometry */
+        .giant-crystal::before {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 85% 20%, 85% 80%, 50% 100%, 15% 80%, 15% 20%);
+            transform: translateZ(50px);
+            box-shadow: 
+                0 0 100px rgba(78, 205, 196, 0.4),
+                0 0 200px rgba(255, 107, 107, 0.2),
+                inset 0 0 50px rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-blend-mode: screen;
+        }
+
+        /* Back face - Subtle depth */
+        .giant-crystal::after {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 85% 20%, 85% 80%, 50% 100%, 15% 80%, 15% 20%);
+            transform: translateZ(-50px);
+            opacity: 0.3;
+            filter: brightness(0.5);
+            border: none;
+        }
+
+        /* Side faces - No rectangular boundaries */
+        .crystal-face-left,
+        .crystal-face-right {
+            position: absolute;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(255, 107, 107, 0.6) 0%, 
+                rgba(78, 205, 196, 0.6) 50%, 
+                rgba(69, 183, 209, 0.6) 100%);
+            animation: colorShift 12s ease-in-out infinite;
+            border: none;
+            outline: none;
+        }
+
+        .crystal-face-left {
+            left: 15%;
+            transform: rotateY(-35deg) translateZ(30px);
+            clip-path: polygon(0% 20%, 80% 0%, 80% 100%, 0% 80%);
+            filter: brightness(0.6);
+            background-blend-mode: multiply;
+        }
+
+        .crystal-face-right {
+            right: 15%;
+            transform: rotateY(35deg) translateZ(30px);
+            clip-path: polygon(20% 0%, 100% 20%, 100% 80%, 20% 100%);
+            filter: brightness(0.6);
+            background-blend-mode: multiply;
+        }
+
+        /* Enhanced shimmer that follows crystal geometry */
+        .giant-crystal::before {
+            position: relative;
+            overflow: visible;
+        }
+
+        .giant-crystal::before::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 30%,
+                rgba(255, 255, 255, 0.6) 50%, 
+                rgba(255, 255, 255, 0.3) 70%,
+                transparent 100%);
+            clip-path: polygon(50% 0%, 85% 20%, 85% 80%, 50% 100%, 15% 80%, 15% 20%);
+            animation: shimmer 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+            25% { background-position: 100% 50%; filter: hue-rotate(90deg); }
+            50% { background-position: 50% 100%; filter: hue-rotate(180deg); }
+            75% { background-position: 100% 0%; filter: hue-rotate(270deg); }
+            100% { background-position: 0% 50%; filter: hue-rotate(360deg); }
+        }
+
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            transform: translateY(-50%);
+            color: white;
+            z-index: 10;
+            max-width: 500px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: colorShift 8s ease-in-out infinite;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .scroll-arrow {
+            display: inline-block;
+            margin-top: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+
+        .demo-content {
+            min-height: 300vh;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 33%, #16213e 66%, #0a0a0a 100%);
+            padding: 100px 50px;
+            color: white;
+            position: relative;
+        }
+
+        .demo-section {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .demo-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #4ecdc4;
+        }
+
+        .demo-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .section-spacer {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-spacer h3 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        <div class="header-content">
+            <div class="logo">CrystalGrowth</div>
+            <nav class="nav">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Giant Central Crystal -->
+    <div class="giant-crystal" id="giantCrystal">
+        <div class="crystal-face-left"></div>
+        <div class="crystal-face-right"></div>
+    </div>
+    
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Growth<br>Visualized</h1>
+            <p class="hero-subtitle">Watch your data crystallize into beautiful insights. Our platform transforms complex analytics into stunning visual experiences that grow with your success.</p>
+            <button class="cta-button">Start Growing</button>
+        </div>
+        
+        <div class="scroll-indicator">
+            Scroll to grow the crystal
+            <div class="scroll-arrow">↓</div>
+        </div>
+    </section>
+
+    <div class="demo-content">
+        <div class="demo-section">
+            <h2>The Crystal of Data Growth</h2>
+            <p>This massive crystal represents the core of your business intelligence. As you scroll through your journey, watch how it expands and evolves, reflecting the growth of your data insights and the expansion of your success.</p>
+            
+            <p>Each facet catches the light differently, just like how different aspects of your data reveal unique insights. The crystal's growth mirrors your company's trajectory - steady, beautiful, and inevitable.</p>
+        </div>
+        
+        <div class="section-spacer">
+            <h3>Watch It Grow</h3>
+        </div>
+        
+        <div class="demo-section">
+            <p>The crystal's expansion represents the accumulation of knowledge, the scaling of operations, and the crystallization of your vision into reality. Every scroll forward is a step toward greater understanding.</p>
+            
+            <p>Notice how the colors shift and dance across its surface - this represents the dynamic nature of real-time data, constantly changing and adapting to new information.</p>
+        </div>
+        
+        <div class="section-spacer">
+            <h3>Pure Data Visualization</h3>
+        </div>
+        
+        <div class="demo-section">
+            <p>This isn't just a visual effect - it's a metaphor for how data should feel. Organic, beautiful, and infinitely expandable. Your analytics don't have to be trapped in boring charts and tables.</p>
+            
+            <p>The future of data visualization is immersive, interactive, and inspiring. Let your data tell its story through experiences that captivate and engage.</p>
+        </div>
+    </div>
+
+    <script>
+        const progressBar = document.getElementById('progressBar');
+        const header = document.getElementById('header');
+        const giantCrystal = document.getElementById('giantCrystal');
+
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrolled / maxScroll) * 100;
+            
+            // Update progress bar
+            progressBar.style.width = scrollPercent + '%';
+            
+            // Header scroll effect
+            if (scrolled > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            // Giant crystal expansion effect - No bounding box restrictions
+            const baseScale = 0.8;
+            const maxScale = 1.6;
+            const scaleIncrease = (scrollPercent / 100) * (maxScale - baseScale);
+            const currentScale = baseScale + scaleIncrease;
+            
+            // Apply scale and subtle rotation - Allow crystal to expand beyond boundaries
+            const rotation = scrollPercent * 0.3; // Subtle rotation as we scroll
+            giantCrystal.style.transform = `translateX(-50%) scale(${currentScale}) rotateY(${rotation}deg)`;
+            
+            // Dynamic color intensity based on scroll
+            const hue = Math.floor(scrollPercent * 7.2); // Faster color cycling
+            const brightness = 1.2 + (scrollPercent * 0.02); // Higher base brightness
+            const saturation = 1.3 + (scrollPercent * 0.025); // More vibrant colors
+            const contrast = 1.1 + (scrollPercent * 0.01); // Enhanced contrast
+            
+            giantCrystal.style.filter = `hue-rotate(${hue}deg) brightness(${brightness}) saturate(${saturation}) contrast(${contrast})`;
+            
+            // Enhanced glow effect that expands with the crystal
+            const glowIntensity = 80 + (scrollPercent * 4);
+            const glowSpread = 150 + (scrollPercent * 3);
+            const glowOpacity = 0.4 + (scrollPercent * 0.006);
+            
+            // Multiple layered glows for more realistic effect
+            const glowEffect = `
+                0 0 ${glowIntensity}px rgba(78, 205, 196, ${glowOpacity}),
+                0 0 ${glowSpread}px rgba(255, 107, 107, ${glowOpacity * 0.6}),
+                0 0 ${glowSpread * 1.5}px rgba(69, 183, 209, ${glowOpacity * 0.3})
+            `;
+            
+            // Apply the enhanced glow to the crystal faces
+            const crystalBefore = giantCrystal.querySelector('::before');
+            giantCrystal.style.setProperty('--glow-effect', glowEffect);
+        });
+    </script>
+</body>
+</html>
