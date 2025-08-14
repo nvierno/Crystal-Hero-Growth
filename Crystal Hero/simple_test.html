@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test - Crystal Hero</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+        }
+        .test-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        .success { border: 2px solid #4CAF50; }
+        .error { border: 2px solid #f44336; }
+        #canvas {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #333;
+            margin: 20px 0;
+            background: #000;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Simple Crystal Hero Test</h1>
+    
+    <div class="test-box">
+        <h2>Basic Functionality Test</h2>
+        <p>This test checks if the basic 3D functionality works without external dependencies.</p>
+        
+        <div id="status">Ready to test...</div>
+        
+        <button class="button" onclick="testBasic3D()">Test Basic 3D</button>
+        <button class="button" onclick="testFileAccess()">Test File Access</button>
+        <button class="button" onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="test-box">
+        <h2>Test Results</h2>
+        <div id="results">No tests run yet.</div>
+    </div>
+
+    <script>
+        let scene, camera, renderer;
+        let animationId;
+        
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = isError ? 'error' : 'success';
+        }
+        
+        function addResult(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += '<p>' + message + '</p>';
+        }
+        
+        function clearCanvas() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateStatus('Canvas cleared');
+        }
+        
+        function testBasic3D() {
+            updateStatus('Testing basic 3D functionality...');
+            addResult('🔍 Testing basic 3D functionality...');
+            
+            try {
+                // Check if Three.js is available
+                if (typeof THREE === 'undefined') {
+                    updateStatus('❌ Three.js not available', true);
+                    addResult('❌ Three.js not available - need to load from CDN');
+                    return;
+                }
+                
+                addResult('✅ Three.js available');
+                
+                // Create basic scene
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, 800 / 300, 0.1, 1000);
+                
+                const canvas = document.getElementById('canvas');
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+                renderer.setSize(800, 300);
+                
+                // Add a simple cube
+                const geometry = new THREE.BoxGeometry();
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+                
+                camera.position.z = 5;
+                
+                // Animate
+                function animate() {
+                    animationId = requestAnimationFrame(animate);
+                    cube.rotation.x += 0.01;
+                    cube.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                animate();
+                
+                updateStatus('✅ Basic 3D working!');
+                addResult('✅ Basic 3D scene created and animated');
+                addResult('✅ Green rotating cube should be visible');
+                
+            } catch (error) {
+                updateStatus('❌ 3D test failed: ' + error.message, true);
+                addResult('❌ 3D test failed: ' + error.message);
+            }
+        }
+        
+        function testFileAccess() {
+            updateStatus('Testing file access...');
+            addResult('🔍 Testing file access...');
+            
+            fetch('./obelisktransparent-crytalshaderscript.glb')
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('✅ GLB file accessible');
+                        addResult('✅ GLB file found and accessible');
+                        addResult('📁 File size: ' + response.headers.get('content-length') + ' bytes');
+                    } else {
+                        updateStatus('❌ GLB file not found', true);
+                        addResult('❌ GLB file not found: ' + response.status + ' ' + response.statusText);
+                    }
+                })
+                .catch(error => {
+                    updateStatus('❌ File access error: ' + error.message, true);
+                    addResult('❌ File access error: ' + error.message);
+                });
+        }
+        
+        // Initialize
+        updateStatus('Ready to test');
+        addResult('🚀 Simple test initialized');
+    </script>
+</body>
+</html>
