@@ -511,7 +511,8 @@
                     scene.add(obeliskModel);
                     loading.style.display = 'none';
                     modelStatus.innerHTML = '✅ GLB Loaded';
-                    
+                    animate()
+
                     logDebug(`Model added to scene - ${gltf.scene.children.length} children`, 'success');
                 },
                 function(progress) {
@@ -587,7 +588,6 @@
             // Update status
             const modelStatus = document.getElementById('model-status');
             modelStatus.innerHTML = '💎 Default Crystal';
-            
             logDebug('Fallback crystal created successfully', 'success');
         }
 
