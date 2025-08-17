@@ -401,8 +401,12 @@
 
             logDebug('Three.js scene initialized successfully', 'success');
 
-            // Start animation loop
-            animate();
+            // Bind animation function to scroll event
+            document.addEventListener("scroll", (event)=>{
+              requestAnimationFrame(animate);
+            });
+
+
 
             // Load the GLB model
             setTimeout(() => {
@@ -546,7 +550,6 @@
         }
 
         function animate() {
-            requestAnimationFrame(animate);
             updateObeliskRotation();
             
             try {
