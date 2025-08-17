@@ -619,6 +619,8 @@
             camera.position.x = mouseX;
             camera.position.y = 1 + mouseY;
             camera.lookAt(0, 0, 0);
+
+            requestAnimationFrame(animate);
         });
 
         // Keyboard shortcuts
