@@ -248,9 +248,9 @@
 
         function updateDebugPanel() {
             if (!debugMode) return;
-            
+
             const content = document.getElementById('debug-content');
-            content.innerHTML = debugLog.slice(-10).map(log => 
+            content.innerHTML = debugLog.slice(-10).map(log =>
                 `<div class="debug-item ${log.type}">[${log.timestamp}] ${log.message}</div>`
             ).join('');
         }
@@ -281,7 +281,7 @@
 
         async function loadThreeJS() {
             logDebug('Starting Three.js loading...', 'info');
-            
+
             for (let i = 0; i < THREE_CDNS.length; i++) {
                 try {
                     await loadScript(THREE_CDNS[i]);
@@ -293,14 +293,14 @@
                     logDebug(`CDN ${i + 1} failed, trying next...`, 'warning');
                 }
             }
-            
+
             logDebug('All Three.js CDNs failed', 'error');
             return false;
         }
 
         async function loadGLTFLoader() {
             logDebug('Loading GLTFLoader...', 'info');
-            
+
             for (let i = 0; i < GLTF_CDNS.length; i++) {
                 try {
                     await loadScript(GLTF_CDNS[i], null, true);
@@ -312,7 +312,7 @@
                     logDebug(`GLTF CDN ${i + 1} failed, trying next...`, 'warning');
                 }
             }
-            
+
             logDebug('All GLTFLoader CDNs failed', 'error');
             return false;
         }
@@ -320,7 +320,7 @@
         // Initialize everything
         (async function() {
             logDebug('Crystal Hero Complete initializing...', 'info');
-            
+
             // Load Three.js
             const threeLoaded = await loadThreeJS();
             if (!threeLoaded) {
@@ -348,7 +348,7 @@
 
         function initCrystalHero() {
             logDebug('Initializing Crystal Hero...', 'info');
-            
+
             // Check WebGL support
             if (!window.WebGLRenderingContext) {
                 logDebug('WebGL not supported', 'error');
@@ -358,7 +358,7 @@
 
             // Scene
             scene = new THREE.Scene();
-            
+
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 5;
@@ -366,14 +366,14 @@
 
             // Renderer
             const canvas = document.getElementById('three-canvas');
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: canvas, 
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
                 alpha: true, // Transparent background
-                antialias: true 
+                antialias: true
             });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
-            
+
             // Enable transparency and proper material rendering
             renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -426,7 +426,7 @@
         function loadHostedGLB() {
             const modelStatus = document.getElementById('model-status');
             const loading = document.getElementById('loading');
-            
+
             logDebug('Starting GLB load process...', 'info');
             loading.style.display = 'block';
             modelStatus.textContent = 'Loading GLB...';
@@ -441,11 +441,11 @@
             }
 
             const loader = new THREE.GLTFLoader();
-            
+
             // Load your hosted GLB file
             const modelPath = './obelisktransparent-crytalshaderscript.glb';
             logDebug(`Attempting to load: ${modelPath}`, 'info');
-            
+
             const loadTimeout = setTimeout(() => {
                 logDebug('GLB loading timeout, using fallback', 'warning');
                 loading.style.display = 'none';
@@ -458,14 +458,14 @@
                 function(gltf) {
                     clearTimeout(loadTimeout);
                     logDebug('GLB model loaded successfully', 'success');
-                    
+
                     // Success callback
                     if (obeliskModel) {
                         scene.remove(obeliskModel);
                     }
 
                     obeliskModel = gltf.scene;
-                    
+
                     // Enhance materials for better crystal effect
                     obeliskModel.traverse((child) => {
                         if (child.isMesh) {
@@ -474,7 +474,7 @@
                                 // Enhance transparency and refraction
                                 material.transparent = true;
                                 material.opacity = Math.max(material.opacity || 0.8, 0.3);
-                                
+
                                 // Check if material has these properties before setting them
                                 if (material.roughness !== undefined) {
                                     material.roughness = Math.min(material.roughness || 0.1, 0.1);
@@ -485,7 +485,7 @@
                                 if (material.envMapIntensity !== undefined) {
                                     material.envMapIntensity = 2.0;
                                 }
-                                
+
                                 // If it's a physical material, enhance transmission
                                 if (material.type === 'MeshPhysicalMaterial' || material.isMeshPhysicalMaterial) {
                                     material.transmission = 0.9;
@@ -500,9 +500,9 @@
                     const box = new THREE.Box3().setFromObject(obeliskModel);
                     const center = box.getCenter(new THREE.Vector3());
                     const size = box.getSize(new THREE.Vector3());
-                    
+
                     obeliskModel.position.sub(center);
-                    
+
                     // Scale to appropriate size
                     const maxDim = Math.max(size.x, size.y, size.z);
                     const scale = 3 / maxDim;
@@ -527,7 +527,7 @@
                     logDebug(`Error loading GLB: ${error.message}`, 'error');
                     loading.style.display = 'none';
                     modelStatus.innerHTML = '❌ GLB Not Found';
-                    
+
                     // Fall back to default crystal
                     createDefaultCrystal();
                 }
@@ -555,7 +555,7 @@
 
         function animate() {
             updateObeliskRotation();
-            
+
             try {
                 if (renderer && scene && camera) {
                     renderer.render(scene, camera);
@@ -615,10 +615,12 @@
 
             obeliskModel = new THREE.Mesh(geometry, material);
             scene.add(obeliskModel);
-            
+
             // Update status
             const modelStatus = document.getElementById('model-status');
             modelStatus.innerHTML = '💎 Default Crystal';
+            animate()
+
             logDebug('Fallback crystal created successfully', 'success');
         }
 
@@ -646,10 +648,10 @@
         // Optional: Mouse interaction
         document.addEventListener('mousemove', (e) => {
             if (!obeliskModel) return;
-            
+
             const mouseX = (e.clientX / window.innerWidth - 0.5) * 0.3;
             const mouseY = (e.clientY / window.innerHeight - 0.5) * 0.3;
-            
+
             camera.position.x = mouseX;
             camera.position.y = 1 + mouseY;
             camera.lookAt(0, 0, 0);
