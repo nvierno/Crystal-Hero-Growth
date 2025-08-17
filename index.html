@@ -226,12 +226,14 @@
         const THREE_CDNS = [
             'https://unpkg.com/three@0.158.0/build/three.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/three.js/r158/three.min.js',
-            'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js'
+            'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js',
+            'lib/three.min.js'
         ];
 
         const GLTF_CDNS = [
             'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js',
-            'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/loaders/GLTFLoader.js'
+            'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/loaders/GLTFLoader.js',
+            'lib/GLTFLoader.js'
         ];
 
         let debugMode = false;
@@ -260,9 +262,10 @@
             updateDebugPanel();
         }
 
-        function loadScript(src, callback) {
+        function loadScript(src, callback, isModule=false) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
+                if(isModule){script.type = "module";}
                 script.src = src;
                 script.onload = () => {
                     logDebug(`Loaded: ${src}`, 'success');
@@ -300,7 +303,7 @@
             
             for (let i = 0; i < GLTF_CDNS.length; i++) {
                 try {
-                    await loadScript(GLTF_CDNS[i]);
+                    await loadScript(GLTF_CDNS[i], null, true);
                     if (typeof THREE.GLTFLoader !== 'undefined') {
                         logDebug(`GLTFLoader loaded successfully from ${GLTF_CDNS[i]}`, 'success');
                         return true;
