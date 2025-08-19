@@ -220,6 +220,12 @@
         </div>
     </div>
 
+    <script type="importmap">
+      {"imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+      }}
+    </script>
     <!-- Three.js with multiple CDN fallbacks -->
     <script>
         // Multiple CDN sources for reliability
@@ -304,6 +310,12 @@
             for (let i = 0; i < GLTF_CDNS.length; i++) {
                 try {
                     await loadScript(GLTF_CDNS[i], null, true);
+
+                    let getGLTFLoader = document.createElement("script");
+                    getGLTFLoader.type = "module";
+                    getGLTFLoader.text = "import { GLTFLoader } from '"+GLTF_CDNS[i]+"'; window.THREE.GLTFLoader = GLTFLoader; ";
+                    document.head.appendChild(getGLTFLoader);
+
                     if (typeof THREE.GLTFLoader !== 'undefined') {
                         logDebug(`GLTFLoader loaded successfully from ${GLTF_CDNS[i]}`, 'success');
                         return true;
