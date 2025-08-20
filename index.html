@@ -392,21 +392,18 @@
             renderer.toneMappingExposure = 1.2;
 
             // Enhanced lighting setup for crystal materials
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-            scene.add(ambientLight);
+            window.light = {};
+            light.ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            light.ambientLight.range = {"intensity": [0.6, 9.6]};
 
-            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight1.position.set(5, 5, 5);
-            scene.add(directionalLight1);
+            light.directionalLight1 = new THREE.DirectionalLight(0xffffff, 1);
+            light.directionalLight1.position.set(5, 5, 5);
+            scene.add(light.directionalLight1);
 
-            const directionalLight2 = new THREE.DirectionalLight(0xa0c4ff, 0.5);
-            directionalLight2.position.set(-5, -5, -5);
-            scene.add(directionalLight2);
+            light.directionalLight2 = new THREE.DirectionalLight(0xa0c4ff, 0.5);
+            scene.add(light.directionalLight2);
 
             // Point light for internal illumination
-            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
-            pointLight.position.set(0, 0, 0);
-            scene.add(pointLight);
 
             // Environment map for reflections
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
