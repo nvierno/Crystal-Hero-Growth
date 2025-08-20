@@ -434,6 +434,13 @@
             }, 500);
         }
 
+        // Linear interpolation
+        function lerp(startValue, endValue, k){
+          let diff = endValue - startValue;
+          let prog = diff * k;
+          return startValue + prog;
+        }
+
         function createEnvironment() {
             const envScene = new THREE.Scene();
             envScene.background = new THREE.Color(0x1a1a2e);
@@ -532,6 +539,13 @@
                     animate()
 
                     logDebug(`Model added to scene - ${gltf.scene.children.length} children`, 'success');
+
+                    window.gltfScene = gltf;
+                    window.mixer = new THREE.AnimationMixer(obeliskModel);
+                    const growAction = mixer.clipAction(gltf.animations[0]);
+                    growAction.play();
+                    growAction.time = 0;
+                    mixer.update(0);
                 },
                 function(progress) {
                     // Progress callback
@@ -561,16 +575,22 @@
                 const targetRotationX = Math.sin(scrollPercent * Math.PI * 4) * 0.2; // Gentle oscillation
 
                 // Smooth rotation interpolation
-                currentRotationY += (targetRotationY - currentRotationY) * 0.1;
-                currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+                // currentRotationY += (targetRotationY - currentRotationY) * 0.1;
+                // currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+                //
+                // obeliskModel.rotation.y = currentRotationY;
+                // obeliskModel.rotation.x = currentRotationX;
+
                 // Interpolate lighting envMapIntensity
                 for(let lightName in light){
                   let intensityRange = light[lightName].range.intensity;
                   light[lightName].intensity = lerp(intensityRange[0], intensityRange[1], scrollPercent);
                 }
 
-                obeliskModel.rotation.y = currentRotationY;
-                obeliskModel.rotation.x = currentRotationX;
+                // Advance animation
+                const growAction = window.mixer.clipAction(window.gltfScene.animations[0]);
+                growAction.time = lerp(0, growAction._clip.duration, scrollPercent);
+                mixer.update(0);
             } catch (error) {
                 logDebug(`Error updating rotation: ${error.message}`, 'error');
             }
