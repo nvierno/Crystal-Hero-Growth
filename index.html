@@ -395,15 +395,23 @@
             window.light = {};
             light.ambientLight = new THREE.AmbientLight(0x404040, 0.6);
             light.ambientLight.range = {"intensity": [0.6, 9.6]};
+            scene.add(light.ambientLight);
 
             light.directionalLight1 = new THREE.DirectionalLight(0xffffff, 1);
             light.directionalLight1.position.set(5, 5, 5);
+            light.directionalLight1.range = {"intensity": [1.0, 16.0]};
             scene.add(light.directionalLight1);
 
             light.directionalLight2 = new THREE.DirectionalLight(0xa0c4ff, 0.5);
+            light.directionalLight2.position.set(-5, -5, -5);
+            light.directionalLight2.range = {"intensity": [0.5, 8.0]};
             scene.add(light.directionalLight2);
 
             // Point light for internal illumination
+            light.pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            light.pointLight.position.set(0, 0, 0);
+            light.pointLight.range = {"intensity": [0.5, 8.0]};
+            scene.add(light.pointLight);
 
             // Environment map for reflections
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -555,6 +563,11 @@
                 // Smooth rotation interpolation
                 currentRotationY += (targetRotationY - currentRotationY) * 0.1;
                 currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+                // Interpolate lighting envMapIntensity
+                for(let lightName in light){
+                  let intensityRange = light[lightName].range.intensity;
+                  light[lightName].intensity = lerp(intensityRange[0], intensityRange[1], scrollPercent);
+                }
 
                 obeliskModel.rotation.y = currentRotationY;
                 obeliskModel.rotation.x = currentRotationX;
